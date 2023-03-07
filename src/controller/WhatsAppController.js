@@ -1,4 +1,7 @@
-class WhatsAppController {
+import { Format } from './../util/Format.js'
+import { CameraController } from './CameraController'
+
+export class WhatsAppController {
 
     constructor () {
 
@@ -207,18 +210,44 @@ class WhatsAppController {
 
             })
 
+            this._camera = new CameraController(this.el.videoCamera)
+
          })
 
          this.el.btnClosePanelCamera.on('click', e => {
 
             this.closeAllMainPanel()
             this.el.panelMessagesContainer.show()
+            this._camera.stop()
 
          })
 
          this.el.btnTakePicture.on('click', e => {
 
-            console.log('take picture')
+            let dataUrl = this._camera.takePicture()
+
+            this.el.pictureCamera.src = dataUrl
+            this.el.pictureCamera.show()
+            this.el.videoCamera.hide()
+            this.el.btnReshootPanelCamera.show()
+            this.el.containerTakePicture.hide()
+            this.el.containerSendPicture.show()
+
+         })
+
+         this.el.btnReshootPanelCamera.on('click', e => {
+
+            this.el.pictureCamera.hide()
+            this.el.videoCamera.show()
+            this.el.btnReshootPanelCamera.hide()
+            this.el.containerTakePicture.show()
+            this.el.containerSendPicture.hide()
+
+         })
+
+         this.el.btnSendPicture.on('click', e => {
+
+            console.log(this.el.pictureCamera.src)
 
          })
 
@@ -324,11 +353,43 @@ class WhatsAppController {
 
             emoji.on('click', e => {
 
-                console.log(emoji.dataset.unicode)
+                let img = this.el.imgEmojiDefault.cloneNode()
+
+                img.style.cssText = emoji.style.cssText
+                img.dataset.unicode = emoji.dataset.unicode
+                img.alt = emoji.dataset.unicode
+
+                emoji.classList.forEach(name => {
+                    img.classList.add(name)
+                })
+
+                let cursor = window.getSelection()
+
+                if (!cursor.focusNode || !cursor.focusNode.id === 'input-text') {
+                    this.el.inputText.focus()
+                    cursor = window.getSelection()
+                }
+
+                let range = document.createRange()
+
+                range = cursor.getRangeAt(0)
+                range.deleteContents()
+
+                let frag = document.createDocumentFragment()
+
+                frag.appendChild(img)
+
+                range.insertNode(frag)
+
+                range.setStartAfter(img)
+
+                this.el.inputText.dispatchEvent(new Event('keyup'))
 
             })
 
         })
+
+
     }
 
     startRecordMicrophoneTime () {
