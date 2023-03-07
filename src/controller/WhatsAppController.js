@@ -1,5 +1,7 @@
 import { Format } from './../util/Format.js'
 import { CameraController } from './CameraController'
+import { MicrophoneController } from './MicrophoneController'
+import { DocumentPreviewController } from './DocumentPreviewController.js'
 
 export class WhatsAppController {
 
@@ -256,10 +258,71 @@ export class WhatsAppController {
             this.closeAllMainPanel()
             this.el.panelDocumentPreview.addClass('open')
             this.el.panelDocumentPreview.css({
-
                 'height': 'calc(100% - 120px)'
-
             })
+            this.el.inputDocument.click()
+
+         })
+
+         this.el.inputDocument.on('change', e => {
+
+            if (this.el.inputDocument.files.length) {
+
+                this.el.panelDocumentPreview.css({
+                    'height': '1%'
+
+                })
+
+                let file = this.el.inputDocument.files[0]
+
+                this._documentPreviewController = new DocumentPreviewController(file)
+
+                this._documentPreviewController.getPreviewData().then(result => {
+
+                    this.el.imgPanelDocumentPreview.src = result.src
+                    this.el.infoPanelDocumentPreview.innerHTML = result.info
+                    this.el.imagePanelDocumentPreview.show()
+                    this.el.filePanelDocumentPreview.hide()
+
+                    this.el.panelDocumentPreview.css({
+
+                        'height': 'calc(100% - 120px)'
+        
+                    })
+
+                }).catch(err => {
+
+                    this.el.panelDocumentPreview.css({
+
+                        'height': 'calc(100% - 120px)'
+        
+                    })
+
+                    console.log(file.type)
+
+                    switch (file.type) {
+
+                        case 'application/zip':
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic'
+                        break
+
+                        case 'application/vnd.debian.binary-package':
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic'
+                        break
+
+                        default:
+                            this.el.iconPanelDocumentPreview.className = 'jcxhw icon-doc-generic'
+                        break
+
+                    }
+
+                    this.el.filePanelDocumentPreview.innerHTML = file.name
+                    this.el.imagePanelDocumentPreview.hide()
+                    this.el.filePanelDocumentPreview.show()
+
+                })
+            }
+
 
          })
 
@@ -294,16 +357,26 @@ export class WhatsAppController {
             this.el.btnSendMicrophone.hide()
             this.startRecordMicrophoneTime()
 
+            this._microphoneController = new MicrophoneController()
+
+            this._microphoneController.on('play', musica => {
+
+                console.log('recebi o evento play', musica)
+
+            })
+
         })
 
         this.el.btnCancelMicrophone.on('click', e => {
 
+            this._microphoneController.stop()
             this.closeRecordMicrophone()
 
         })
 
         this.el.btnFinishMicrophone.on('click', e => {
 
+            this._microphoneController.stop()
             this.closeRecordMicrophone()
 
         })
