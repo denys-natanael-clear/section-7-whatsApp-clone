@@ -17,6 +17,57 @@ export class Firebase {
             appId: "1:895279050794:web:0e6b4d799e847304f9d353"
           };
 
+          if (!window._initializedFirebase) {
+
+              firebase.initializeApp(firebaseConfig)
+
+              firebase.firestore().settings({
+                timestampsInSnapshot: true
+              })
+              if (firebase) {
+
+              }
+
+              window._initializedFirebase = true
+
+          }
+
+
+    }
+
+    static db () {
+
+        return firebase.firestore()
+
+    }
+
+    static hd () {
+
+        return firebase.storage()
+
+    }
+
+    initAuth () {
+
+        return new Promise((s,f) => {
+
+            let provider = new firebase.auth.GoogleAuthProvider()
+
+            firebase.auth().signInWithPopup(provider)
+            .then(result => {
+
+                let token = result.credential.accessToken
+                let user = result.user
+
+                s({
+                    user,
+                    token
+                })
+
+            })
+
+        })
+
     }
 
 }
