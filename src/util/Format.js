@@ -32,8 +32,8 @@ export class Format {
 
         return date.toLocaleTimeString(this._locale, {
 
-            hours: '2-digit',
-            minutes: '2-digit'
+            hour: '2-digit',
+            minute: '2-digit'
 
         })
 
@@ -44,5 +44,6 @@ export class Format {
         return (timeStamp && typeof timeStamp.toDate === 'function') ? Format.dateToTime(timeStamp.toDate()) : ''
 
     }
+
  
 }
