@@ -7,6 +7,7 @@ import { User } from '../model/User.js'
 import { Chat } from '../model/Chat.js'
 import { Message } from '../model/Message.js'
 import { Base64 } from '../util/Base64.js'
+import { ContactsController } from './ContactsController.js'
 
 
 export class WhatsAppController {
@@ -222,12 +223,21 @@ export class WhatsAppController {
 
                         this.el.panelMessagesContainer.appendChild(view)
 
-                    } else if (me) {
+                    } else {
+
+                        let view = message.getViewElement(me)
+
+                        this.el.panelMessagesContainer.querySelector('#_' + data.id).innerHTML = view.innerHTML
+
+                    } 
+
+
+                    if (this.el.panelMessagesContainer.querySelector('#_' + data.id) && me) {
 
                         let msgEl = this.el.panelMessagesContainer.querySelector('#_' + data.id)
 
                         msgEl.querySelector('.message-status').innerHTML = message.getStatusViewElement().outerHTML
-
+                    
                     }
 
                 })
@@ -679,28 +689,38 @@ export class WhatsAppController {
             } else {
 
                 Message.sendDocument(
-                    this._contactActive.chatId,
-                    this._user.email, file, base64, this.el.infoPanelDocumentPreview.innerHTML
+                    this._contactActive.chatId, 
+                    this._user.email, file)
 
-                )
-
+                    
+                }
+                
                 this.el.btnClosePanelDocumentPreview.click()
-
-            }
-
 
 
         })
 
         this.el.btnAttachContact.on('click', e => {
 
-            this.el.modalContacts.show()
+            this._contactsController = new ContactsController(this.el.modalContacts, this._user);
+
+            this._contactsController.on('select', contact =>{
+
+                Message.sendContact(
+                this._contactActive.chatId,
+                this._user.email,
+                contact
+                )
+
+            })
+
+            this._contactsController.open()
 
         })
 
         this.el.btnCloseModalContacts.on('click', e => {
 
-            this.el.modalContacts.hide()
+            this._contactsController.close()
 
         })
 
